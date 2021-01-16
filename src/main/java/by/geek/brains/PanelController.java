@@ -72,7 +72,7 @@ public class PanelController implements Initializable {
         filesTable.getSortOrder().add(fileTypeColumn);
 
         discsBox.getItems().clear();
-        for (java.nio.file.Path p: FileSystems.getDefault().getRootDirectories()) {
+        for (Path p: FileSystems.getDefault().getRootDirectories()) {
             discsBox.getItems().add(p.toString());
         }
         discsBox.getSelectionModel().select(0);
@@ -106,7 +106,7 @@ public class PanelController implements Initializable {
 
 
     public void btnPathUpAction(ActionEvent actionEvent) {
-        java.nio.file.Path upperPath = Paths.get(pathField.getText()).getParent();
+        Path upperPath = Paths.get(pathField.getText()).getParent();
         if (upperPath != null) {
             updateList(upperPath);
         }
