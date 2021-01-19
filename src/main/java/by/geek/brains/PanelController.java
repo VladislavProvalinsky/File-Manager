@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -72,7 +74,7 @@ public class PanelController implements Initializable {
         filesTable.getSortOrder().add(fileTypeColumn);
 
         discsBox.getItems().clear();
-        for (java.nio.file.Path p: FileSystems.getDefault().getRootDirectories()) {
+        for (Path p: FileSystems.getDefault().getRootDirectories()) {
             discsBox.getItems().add(p.toString());
         }
         discsBox.getSelectionModel().select(0);
@@ -81,7 +83,7 @@ public class PanelController implements Initializable {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2){
-                    java.nio.file.Path path = Paths.get(pathField.getText()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
+                    Path path = Paths.get(pathField.getText()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
                     if (Files.isDirectory(path)){
                         updateList(path);
                     }
@@ -94,9 +96,13 @@ public class PanelController implements Initializable {
 
     public void updateList(Path path) {
         try {
-            pathField.setText(path.normalize().toAbsolutePath().toString());
+            Path newPath = path.normalize().toAbsolutePath();
+            pathField.setText(newPath.toString());
+            System.out.println(Arrays.toString(filesTable.getItems().toArray()));
             filesTable.getItems().clear();
-            filesTable.getItems().addAll(Files.list(path).map(FileInfo::new).collect(Collectors.toList()));
+            System.out.println(Arrays.toString(filesTable.getItems().toArray()));
+            System.out.println("----------------------");
+            filesTable.getItems().addAll(Files.list(newPath).map(FileInfo::new).collect(Collectors.toList()));
             filesTable.sort();
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов", ButtonType.OK);
@@ -104,9 +110,34 @@ public class PanelController implements Initializable {
         }
     }
 
+//    public void updateListForDeleteAndMove(Path path) {
+//        try {
+//            Path newPath = path.getParent().normalize().toAbsolutePath();
+//            pathField.setText(newPath.toString());
+//            System.out.println(Arrays.toString(filesTable.getItems().toArray()));
+//            filesTable.getItems().clear();
+//            System.out.println(Arrays.toString(filesTable.getItems().toArray()));
+//            List<String> collect = Files.list(newPath).map(String::valueOf).filter(el ->
+//                    !el.equals(String.valueOf(path)))
+//                    .collect(Collectors.toList());
+//            System.out.println(collect);
+//            System.out.println("----------------------");
+//            filesTable.getItems().addAll(Files.list(newPath)
+//                    .map(String::valueOf)
+//                    .filter(el -> !el.equals(String.valueOf(path)))
+//                    .map (Paths::get)
+//                    .map(FileInfo::new)
+//                    .collect(Collectors.toList()));
+//            filesTable.sort();
+//        } catch (IOException e) {
+//            Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов", ButtonType.OK);
+//            alert.showAndWait();
+//        }
+//    }
+
 
     public void btnPathUpAction(ActionEvent actionEvent) {
-        java.nio.file.Path upperPath = Paths.get(pathField.getText()).getParent();
+        Path upperPath = Paths.get(pathField.getText()).getParent();
         if (upperPath != null) {
             updateList(upperPath);
         }
